@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "818987862063",
+    "firebase_url": "https://sar-track-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "sar-track",
+    "storage_bucket": "sar-track.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818987862063:android:69ca2441801a697dd7deda",
+        "android_client_info": {
+          "package_name": "com.example.sar_track"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "818987862063-kh8scdomf823rl6gh5v3dh1cuulakhvk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzhfy_jhkpa2-8EBo2Qr_3eeRyNyZvTEA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "818987862063-kh8scdomf823rl6gh5v3dh1cuulakhvk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
