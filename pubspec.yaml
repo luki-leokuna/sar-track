@@ -21,6 +21,9 @@ dependencies:
   # State Management — GetX
   get: ^4.7.2
 
+  # Auth — pin ke versi stabil dengan API yang dikenal
+  google_sign_in: 6.1.0
+
   # Maps & Lokasi
   google_maps_flutter: ^2.17.0
   geolocator: ^14.0.2
