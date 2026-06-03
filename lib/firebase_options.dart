@@ -17,19 +17,13 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -59,6 +53,28 @@ class DefaultFirebaseOptions {
     projectId: 'sar-track',
     databaseURL: 'https://sar-track-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'sar-track.firebasestorage.app',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBh7DYWwFnPMh3_Ep9DRbemx_XQKMVfwj0',
+    appId: '1:818987862063:web:c6bd2834f9e9d690d7deda',
+    messagingSenderId: '818987862063',
+    projectId: 'sar-track',
+    authDomain: 'sar-track.firebaseapp.com',
+    databaseURL: 'https://sar-track-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'sar-track.firebasestorage.app',
+    measurementId: 'G-PM9P6RKK4T',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyA8MxGTNkcbNOJlmYUNv2tm3gXzoZK6WL4',
+    appId: '1:818987862063:ios:b364eca82630ddd1d7deda',
+    messagingSenderId: '818987862063',
+    projectId: 'sar-track',
+    databaseURL: 'https://sar-track-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'sar-track.firebasestorage.app',
+    iosClientId: '818987862063-0ctf9uvsr931jve2io0pfg0a2t15o2si.apps.googleusercontent.com',
+    iosBundleId: 'com.example.sarTrack',
   );
 
 }
