@@ -1,5 +1,5 @@
 name: sar_track
-description: "Sistem Koordinasi Lapangan Terintegrasi untuk Tim SAR."
+description: "Aplikasi koordinasi lapangan untuk tim SAR"
 publish_to: 'none'
 
 version: 1.0.0+1

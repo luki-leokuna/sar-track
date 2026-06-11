@@ -35,7 +35,7 @@ class AuthController extends GetxController {
     ever(_bindAuthState(), _handleAuthStateChange);
   }
 
-  /// Bind Firebase authStateChanges ke Rx<User?> untuk didengarkan ever()
+  // Bind Firebase authStateChanges ke Rx<User?> untuk didengarkan ever()
   Rx<User?> _bindAuthState() {
     final rxUser = Rx<User?>(null);
     _authService.authStateChanges.listen((user) {

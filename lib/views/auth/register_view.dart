@@ -1,8 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class RegisterView extends StatelessWidget {
+import 'package:sar_track/controllers/auth_controller.dart';
+
+class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
+
+  @override
+  State<RegisterView> createState() => _RegisterViewState();
+}
+
+class _RegisterViewState extends State<RegisterView> {
+  final AuthController authController = Get.find<AuthController>();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +100,9 @@ class RegisterView extends StatelessWidget {
                         width: double.infinity,
                         height: 48,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            authController.loginWithGoogle();
+                          },
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: Colors.grey.shade300),
                             shape: RoundedRectangleBorder(
@@ -130,6 +154,7 @@ class RegisterView extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       _buildTextField(
+                        controller: usernameController,
                         hintText: "Username Anda",
                         icon: Icons.person_outline,
                       ),
@@ -146,6 +171,7 @@ class RegisterView extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       _buildTextField(
+                        controller: emailController,
                         hintText: "nama@instansi.go.id",
                         icon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
@@ -163,6 +189,7 @@ class RegisterView extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       _buildTextField(
+                        controller: passwordController,
                         hintText: "••••••••",
                         icon: Icons.lock_outline,
                         obscureText: true,
@@ -180,6 +207,7 @@ class RegisterView extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       _buildTextField(
+                        controller: confirmPasswordController,
                         hintText: "••••••••",
                         icon: Icons.history, // Icon yang mirip di referensi gambar
                         obscureText: true,
@@ -187,11 +215,35 @@ class RegisterView extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       // Tombol Daftar Sekarang
+                      Obx(() => authController.errorMessage.value.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Text(
+                                authController.errorMessage.value,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink()),
                       SizedBox(
                         width: double.infinity,
                         height: 48,
-                        child: ElevatedButton(
-                          onPressed: () {},
+                        child: Obx(() => ElevatedButton(
+                          onPressed: authController.isLoading.value
+                              ? null
+                              : () {
+                                  if (passwordController.text != confirmPasswordController.text) {
+                                    authController.errorMessage.value = "Konfirmasi kata sandi tidak cocok.";
+                                    return;
+                                  }
+                                  authController.register(
+                                    email: emailController.text,
+                                    password: passwordController.text,
+                                    username: usernameController.text,
+                                  );
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFF6600), // Oranye
                             foregroundColor: Colors.white,
@@ -200,14 +252,23 @@ class RegisterView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text(
-                            "Daftar Sekarang",
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                          child: authController.isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  "Daftar Sekarang",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        )),
                       ),
                     ],
                   ),
@@ -261,12 +322,15 @@ class RegisterView extends StatelessWidget {
 
   // Method helper untuk textfield agar kode lebih rapi dan reusable
   Widget _buildTextField({
+    TextEditingController? controller,
     required String hintText,
     required IconData icon,
     bool obscureText = false,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return TextField(
+      controller: controller,
+      onChanged: (_) => authController.clearError(),
       obscureText: obscureText,
       keyboardType: keyboardType,
       decoration: InputDecoration(

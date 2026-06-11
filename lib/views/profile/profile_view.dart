@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sar_track/views/dashboard/dashboard_view.dart';
 import 'package:sar_track/views/auth/login_view.dart';
+import 'package:sar_track/views/teams/team_view.dart';
+import 'package:sar_track/views/tracking/map_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -31,7 +33,7 @@ class ProfileView extends StatelessWidget {
                               border: Border.all(color: Colors.white, width: 4),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 10,
                                   offset: const Offset(0, 5),
                                 )
@@ -102,7 +104,7 @@ class ProfileView extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF131A26).withOpacity(0.9),
+                                color: const Color(0xFF131A26).withValues(alpha: 0.9),
                               ),
                             ),
                           ],
@@ -170,10 +172,14 @@ class ProfileView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildNavItem(Icons.assignment_outlined, "Missions", false, onTap: () {
-                Get.offAll(() => const DashboardView());
+                Get.offAll(() => const DashboardView(), transition: Transition.noTransition);
               }),
-              _buildNavItem(Icons.map_outlined, "Map", false),
-              _buildNavItem(Icons.people_outline, "Teams", false),
+              _buildNavItem(Icons.map_outlined, "Map", false, onTap: () {
+                Get.offAll(() => const MapView(), transition: Transition.noTransition);
+              }),
+              _buildNavItem(Icons.people_outline, "Teams", false, onTap: () {
+                Get.offAll(() => const TeamView(), transition: Transition.noTransition);
+              }),
               _buildNavItem(Icons.account_circle_outlined, "Account", true),
             ],
           ),

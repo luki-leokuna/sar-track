@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sar_track/views/auth/register_view.dart';
-import 'package:sar_track/views/dashboard/dashboard_view.dart';
+import 'package:sar_track/controllers/auth_controller.dart';
 
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
   const LoginView({super.key});
+
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+  final AuthController authController = Get.find<AuthController>();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +96,9 @@ class LoginView extends StatelessWidget {
                         width: double.infinity,
                         height: 48,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            authController.loginWithGoogle();
+                          },
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: Colors.grey.shade300),
                             shape: RoundedRectangleBorder(
@@ -132,7 +150,9 @@ class LoginView extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       TextField(
+                        controller: emailController,
                         keyboardType: TextInputType.emailAddress,
+                        onChanged: (_) => authController.clearError(),
                         decoration: InputDecoration(
                           hintText: "nama@instansi.go.id",
                           hintStyle: const TextStyle(color: Color(0xFFAEB5BC), fontSize: 14),
@@ -167,7 +187,9 @@ class LoginView extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       TextField(
+                        controller: passwordController,
                         obscureText: true,
+                        onChanged: (_) => authController.clearError(),
                         decoration: InputDecoration(
                           hintText: "••••••••",
                           hintStyle: const TextStyle(color: Color(0xFFAEB5BC), fontSize: 14),
@@ -214,13 +236,30 @@ class LoginView extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       // Tombol Masuk via Email
+                      Obx(() => authController.errorMessage.value.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Text(
+                                authController.errorMessage.value,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink()),
                       SizedBox(
                         width: double.infinity,
                         height: 48,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Get.offAll(() => const DashboardView()); // Pindah ke Dashboard & hapus history back
-                          },
+                        child: Obx(() => ElevatedButton(
+                          onPressed: authController.isLoading.value
+                              ? null
+                              : () {
+                                  authController.loginWithEmail(
+                                    email: emailController.text,
+                                    password: passwordController.text,
+                                  );
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFF6600), // Oranye
                             foregroundColor: Colors.white,
@@ -229,14 +268,23 @@ class LoginView extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text(
-                            "Masuk via Email",
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                          child: authController.isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  "Masuk",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        )),
                       ),
                     ],
                   ),

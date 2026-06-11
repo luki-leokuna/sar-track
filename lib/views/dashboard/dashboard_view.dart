@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sar_track/views/profile/profile_view.dart';
+import 'package:sar_track/views/teams/team_view.dart';
+import 'package:sar_track/views/tracking/map_view.dart';
+import 'package:sar_track/services/auth_service.dart';
+import 'package:sar_track/views/teams/create_team_view.dart';
+import 'package:sar_track/views/teams/join_team_view.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
@@ -10,7 +15,7 @@ class DashboardView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,16 +29,24 @@ class DashboardView extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: const Color(0xFFFF6600), width: 2),
-                      image: const DecorationImage(
-                        image: NetworkImage("https://i.pravatar.cc/150?img=11"),
-                        fit: BoxFit.cover,
-                      ),
+                      color: Colors.grey.shade200,
+                      image: AuthService().currentUser?.photoURL != null
+                          ? DecorationImage(
+                              image: NetworkImage(AuthService().currentUser!.photoURL!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
+                    child: AuthService().currentUser?.photoURL == null
+                        ? const Icon(Icons.person, color: Colors.grey, size: 32)
+                        : null,
                   ),
                   const SizedBox(width: 16),
-                  const Text(
-                    "Cmdr. Thompson",
-                    style: TextStyle(
+                  Text(
+                    AuthService().currentUser?.displayName ?? 
+                    AuthService().currentUser?.email?.split('@').first ?? 
+                    "Sobat SAR",
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
                       color: Color(0xFF131A26),
@@ -45,7 +58,9 @@ class DashboardView extends StatelessWidget {
 
               // 2. Card "Buat Tim Baru"
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Get.to(() => const CreateTeamView());
+                },
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
                   width: double.infinity,
@@ -85,7 +100,9 @@ class DashboardView extends StatelessWidget {
 
               // 3. Card "Gabung Tim"
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Get.to(() => const JoinTeamView());
+                },
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
                   width: double.infinity,
@@ -95,7 +112,7 @@ class DashboardView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF131A26).withOpacity(0.2),
+                        color: const Color(0xFF131A26).withValues(alpha: 0.2),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -148,10 +165,14 @@ class DashboardView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildNavItem(Icons.assignment, "Missions", true),
-              _buildNavItem(Icons.map_outlined, "Map", false),
-              _buildNavItem(Icons.people_outline, "Teams", false),
+              _buildNavItem(Icons.map_outlined, "Map", false, onTap: () {
+                Get.offAll(() => const MapView(), transition: Transition.noTransition);
+              }),
+              _buildNavItem(Icons.people_outline, "Teams", false, onTap: () {
+                Get.offAll(() => const TeamView(), transition: Transition.noTransition);
+              }),
               _buildNavItem(Icons.account_circle_outlined, "Account", false, onTap: () {
-                Get.offAll(() => const ProfileView());
+                Get.offAll(() => const ProfileView(), transition: Transition.noTransition);
               }),
             ],
           ),
