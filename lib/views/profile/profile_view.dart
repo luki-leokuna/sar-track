@@ -39,7 +39,7 @@ class ProfileView extends StatelessWidget {
                                 )
                               ],
                               image: const DecorationImage(
-                                image: NetworkImage("https://i.pravatar.cc/150?img=11"),
+                                image: NetworkImage("https://randomuser.me/api/portraits/men/11.jpg"),
                                 fit: BoxFit.cover,
                               ),
                             ),

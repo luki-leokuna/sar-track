@@ -3,42 +3,17 @@ import 'package:get/get.dart';
 import 'package:sar_track/views/dashboard/dashboard_view.dart';
 import 'package:sar_track/views/profile/profile_view.dart';
 import 'package:sar_track/views/tracking/map_view.dart';
-
-class TeamMember {
-  final String name;
-  final String status;
-  final String imageUrl;
-
-  TeamMember({
-    required this.name,
-    required this.status,
-    required this.imageUrl,
-  });
-}
+import 'package:sar_track/controllers/tracking_controller.dart';
+import 'package:sar_track/controllers/team_controller.dart';
+import 'package:sar_track/models/tracker_model.dart';
 
 class TeamView extends StatelessWidget {
   const TeamView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<TeamMember> teamMembers = [
-      TeamMember(
-          name: "Cmdr. Thompson",
-          status: "Online",
-          imageUrl: "https://i.pravatar.cc/150?img=11"),
-      TeamMember(
-          name: "Sgt. Miller",
-          status: "Busy",
-          imageUrl: "https://i.pravatar.cc/150?img=12"),
-      TeamMember(
-          name: "Sgt. Sarah",
-          status: "Online",
-          imageUrl: "https://i.pravatar.cc/150?img=5"),
-      TeamMember(
-          name: "Medic Harris",
-          status: "Offline",
-          imageUrl: "https://i.pravatar.cc/150?img=13"),
-    ];
+    final trackingController = Get.put(TrackingController());
+    final teamController = Get.put(TeamController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -48,25 +23,41 @@ class TeamView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Team",
-                style: TextStyle(
+              Obx(() => Text(
+                teamController.activeTeam.value?.teamName ?? "Team",
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF131A26),
                 ),
-              ),
+              )),
               const SizedBox(height: 24),
               Expanded(
-                child: ListView.separated(
-                  itemCount: teamMembers.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    final member = teamMembers[index];
-                    return _buildTeamCard(member);
-                  },
-                ),
+                child: Obx(() {
+                  final members = trackingController.teamTrackers;
+
+                  if (teamController.activeTeam.value == null) {
+                    return const Center(
+                      child: Text("Anda belum tergabung dalam tim."),
+                    );
+                  }
+
+                  if (members.isEmpty) {
+                    return const Center(
+                      child: Text("Belum ada anggota tim yang aktif."),
+                    );
+                  }
+
+                  return ListView.separated(
+                    itemCount: members.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final member = members[index];
+                      return _buildTeamCard(member);
+                    },
+                  );
+                }),
               ),
             ],
           ),
@@ -85,27 +76,35 @@ class TeamView extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamCard(TeamMember member) {
+  Widget _buildTeamCard(TrackerModel member) {
     Color statusColor;
     Color statusBgColor;
     Color statusDotColor;
 
-    switch (member.status.toLowerCase()) {
-      case "online":
+    switch (member.status) {
+      case MemberStatus.online:
         statusColor = const Color(0xFF2E7D32); // Dark Green
         statusBgColor = const Color(0xFFE8F5E9); // Light Green
         statusDotColor = const Color(0xFF4CAF50); // Green Dot
         break;
-      case "busy":
+      case MemberStatus.busy:
         statusColor = const Color(0xFFD84315); // Dark Orange
         statusBgColor = const Color(0xFFFBE9E7); // Light Orange
         statusDotColor = const Color(0xFFFF9800); // Orange Dot
         break;
-      default: // offline
+      case MemberStatus.sos:
+        statusColor = const Color(0xFFC62828); // Dark Red
+        statusBgColor = const Color(0xFFFFEBEE); // Light Red
+        statusDotColor = const Color(0xFFF44336); // Red Dot
+        break;
+      case MemberStatus.offline:
+      default:
         statusColor = const Color(0xFF616161); // Dark Grey
         statusBgColor = const Color(0xFFEEEEEE); // Light Grey
         statusDotColor = const Color(0xFF9E9E9E); // Grey Dot
     }
+
+    final imageUrl = "https://ui-avatars.com/api/?name=${Uri.encodeComponent(member.username)}&background=random";
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -126,7 +125,7 @@ class TeamView extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                    image: NetworkImage(member.imageUrl),
+                    image: NetworkImage(imageUrl),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -150,7 +149,7 @@ class TeamView extends StatelessWidget {
           // Name
           Expanded(
             child: Text(
-              member.name,
+              member.username,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -166,7 +165,7 @@ class TeamView extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              member.status,
+              member.statusLabel,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
