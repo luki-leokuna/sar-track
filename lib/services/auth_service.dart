@@ -55,6 +55,15 @@ class AuthService {
     }
   }
 
+  /// Kirim email reset password ke alamat email yang diberikan.
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (e) {
+      throw _parseAuthException(e);
+    }
+  }
+
   // ─── Google Sign-In ────────────────────────────────────────────────────────
 
   /// Login menggunakan akun Google.

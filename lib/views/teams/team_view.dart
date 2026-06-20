@@ -23,14 +23,30 @@ class TeamView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => Text(
-                teamController.activeTeam.value?.teamName ?? "Team",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF131A26),
-                ),
-              )),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Obx(() => Text(
+                    teamController.activeTeam.value?.teamName ?? "Team",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF131A26),
+                    ),
+                  )),
+                  IconButton(
+                    onPressed: () => Get.offAll(() => const DashboardView(),
+                        transition: Transition.noTransition),
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF131A26)),
+                    style: IconButton.styleFrom(
+                      backgroundColor: const Color(0xFFF1F3F5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 24),
               Expanded(
                 child: Obx(() {
