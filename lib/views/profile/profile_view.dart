@@ -26,6 +26,22 @@ class ProfileView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // 0. Tombol Kembali ke Dashboard
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    onPressed: () => Get.offAll(() => const DashboardView(),
+                        transition: Transition.noTransition),
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF131A26)),
+                    style: IconButton.styleFrom(
+                      backgroundColor: const Color(0xFFF1F3F5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 // 1. Profile Picture & Name
                 Center(
                   child: Obx(() {

@@ -545,8 +545,38 @@ class _MapViewState extends State<MapView> {
             ],
           ),
 
-          // 2. Top Left Overlay Card
-          Positioned(top: 50, left: 16, child: _buildTopOverlay()),
+          // 2. Tombol Kembali ke Dashboard
+          Positioned(
+            top: 8,
+            right: 16,
+            child: SafeArea(
+              child: InkWell(
+                onTap: () => Get.offAll(() => const DashboardView(),
+                    transition: Transition.noTransition),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF131A26),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white24),
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(0, 2))
+                    ],
+                  ),
+                  child: const Icon(Icons.arrow_back, color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+
+          // 3. Top Left Overlay Card
+          Positioned(
+            top: 50,
+            left: 16,
+            child: _buildTopOverlay(),
+          ),
 
           // 3. Right Controls
           Positioned(

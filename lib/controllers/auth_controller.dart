@@ -25,6 +25,15 @@ class AuthController extends GetxController {
   /// Pesan error untuk ditampilkan di UI
   final RxString errorMessage = ''.obs;
 
+  /// Status loading khusus untuk proses kirim email reset password
+  final RxBool isResetLoading = false.obs;
+
+  /// Pesan error khusus untuk popup lupa kata sandi
+  final RxString resetErrorMessage = ''.obs;
+
+  /// Pesan sukses khusus untuk popup lupa kata sandi
+  final RxString resetSuccessMessage = ''.obs;
+
   // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
@@ -53,8 +62,20 @@ class AuthController extends GetxController {
       Get.offAllNamed('/login');
     } else {
       // User login → ambil profil dari database lalu ke Dashboard
-      final user = await _dbService.getUser(firebaseUser.uid);
-      currentUser.value = user;
+      try {
+        final user = await _dbService.getUser(firebaseUser.uid);
+        currentUser.value = user;
+      } catch (e) {
+        // Gagal ambil profil (misal permission-denied di Database Rules).
+        // Tetap lanjut ke dashboard agar user tidak "tersangkut" di halaman login;
+        // tampilkan pesan agar masalah Rules tetap kelihatan saat development.
+        errorMessage.value = 'Login berhasil, tetapi gagal memuat profil: $e';
+        currentUser.value = UserModel(
+          uid: firebaseUser.uid,
+          username: firebaseUser.email?.split('@').first ?? 'User',
+          email: firebaseUser.email ?? '',
+        );
+      }
       Get.offAllNamed('/dashboard');
     }
   }
@@ -177,6 +198,45 @@ class AuthController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // ─── Lupa Kata Sandi ──────────────────────────────────────────────────────
+
+  /// Kirim email reset password. Mengembalikan true jika berhasil dikirim,
+  /// sehingga UI (popup) tahu kapan harus menampilkan pesan sukses.
+  Future<bool> resetPassword({required String email}) async {
+    resetErrorMessage.value = '';
+    resetSuccessMessage.value = '';
+
+    if (email.trim().isEmpty) {
+      resetErrorMessage.value = 'Masukkan email terlebih dahulu.';
+      return false;
+    }
+
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email.trim())) {
+      resetErrorMessage.value = 'Format email tidak valid.';
+      return false;
+    }
+
+    try {
+      isResetLoading.value = true;
+      await _authService.sendPasswordResetEmail(email: email);
+      resetSuccessMessage.value =
+          'Tautan reset password telah dikirim ke $email. Periksa kotak masuk (atau folder spam) email kamu.';
+      return true;
+    } catch (e) {
+      resetErrorMessage.value = e.toString();
+      return false;
+    } finally {
+      isResetLoading.value = false;
+    }
+  }
+
+  /// Bersihkan pesan-pesan terkait popup lupa kata sandi (dipanggil saat popup dibuka/ditutup)
+  void clearResetMessages() {
+    resetErrorMessage.value = '';
+    resetSuccessMessage.value = '';
   }
 
   // ─── Helper ───────────────────────────────────────────────────────────────
