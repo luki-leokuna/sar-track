@@ -23,14 +23,16 @@ class TeamView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => Text(
-                teamController.activeTeam.value?.teamName ?? "Team",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF131A26),
+              Obx(
+                () => Text(
+                  teamController.activeTeam.value?.teamName ?? "Team",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF131A26),
+                  ),
                 ),
-              )),
+              ),
               const SizedBox(height: 24),
               Expanded(
                 child: Obx(() {
@@ -66,9 +68,7 @@ class TeamView extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: const Color(0xFFFF6600),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,
         child: const Icon(Icons.person_add_alt_1, color: Colors.white),
       ),
@@ -104,7 +104,8 @@ class TeamView extends StatelessWidget {
         statusDotColor = const Color(0xFF9E9E9E); // Grey Dot
     }
 
-    final imageUrl = "https://ui-avatars.com/api/?name=${Uri.encodeComponent(member.username)}&background=random";
+    final imageUrl =
+        "https://ui-avatars.com/api/?name=${Uri.encodeComponent(member.username)}&background=random";
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -193,27 +194,52 @@ class TeamView extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildNavItem(Icons.assignment, "Missions", false, onTap: () {
-              Get.offAll(() => const DashboardView(),
-                  transition: Transition.noTransition);
-            }),
-            _buildNavItem(Icons.map_outlined, "Map", false, onTap: () {
-              Get.offAll(() => const MapView(), transition: Transition.noTransition);
-            }),
+            _buildNavItem(
+              Icons.assignment,
+              "Missions",
+              false,
+              onTap: () {
+                Get.offAll(
+                  () => DashboardView(),
+                  transition: Transition.noTransition,
+                );
+              },
+            ),
+            _buildNavItem(
+              Icons.map_outlined,
+              "Map",
+              false,
+              onTap: () {
+                Get.offAll(
+                  () => MapView(),
+                  transition: Transition.noTransition,
+                );
+              },
+            ),
             _buildNavItem(Icons.people, "Teams", true), // Selected
-            _buildNavItem(Icons.account_circle_outlined, "Account", false,
-                onTap: () {
-              Get.offAll(() => const ProfileView(),
-                  transition: Transition.noTransition);
-            }),
+            _buildNavItem(
+              Icons.account_circle_outlined,
+              "Account",
+              false,
+              onTap: () {
+                Get.offAll(
+                  () => ProfileView(),
+                  transition: Transition.noTransition,
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool isSelected,
-      {VoidCallback? onTap}) {
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    bool isSelected, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
