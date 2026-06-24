@@ -4,6 +4,7 @@
 /// Manajemen session login dan routing halaman awal.
 /// Menggabungkan AuthService + DatabaseService untuk alur register/login lengkap.
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sar_track/models/user_model.dart';
@@ -180,6 +181,50 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = e.toString();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ─── Ganti Kata Sandi ─────────────────────────────────────────────────────
+
+  /// Mengganti kata sandi pengguna dengan memverifikasi kata sandi lama terlebih dahulu.
+  Future<void> changePassword({required String oldPassword, required String newPassword}) async {
+    try {
+      isLoading.value = true;
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null || user.email == null) {
+        Get.snackbar('Gagal', 'Sesi login tidak valid.', 
+            backgroundColor: Colors.red.shade50, colorText: Colors.red.shade800, margin: const EdgeInsets.all(16));
+        return;
+      }
+
+      // Re-authenticate first
+      final credential = EmailAuthProvider.credential(email: user.email!, password: oldPassword);
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+
+      Get.back();
+      Get.snackbar('Sukses', 'Kata sandi berhasil diperbarui.', 
+          backgroundColor: Colors.green.shade50, colorText: Colors.green.shade800, margin: const EdgeInsets.all(16));
+    } on FirebaseAuthException catch (e) {
+      String message = 'Terjadi kesalahan.';
+      if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        message = 'Kata sandi saat ini salah.';
+      } else if (e.code == 'weak-password') {
+        message = 'Kata sandi baru terlalu lemah.';
+      } else if (e.code == 'requires-recent-login') {
+        message = 'Sesi telah kedaluwarsa. Silakan login ulang untuk mengganti kata sandi.';
+      } else {
+        message = e.message ?? e.toString();
+      }
+      Get.snackbar('Gagal', message, 
+          backgroundColor: Colors.red.shade50, colorText: Colors.red.shade800, margin: const EdgeInsets.all(16));
+    } catch (e) {
+      Get.snackbar('Gagal', 'Terjadi kesalahan: $e', 
+          backgroundColor: Colors.red.shade50, colorText: Colors.red.shade800, margin: const EdgeInsets.all(16));
     } finally {
       isLoading.value = false;
     }

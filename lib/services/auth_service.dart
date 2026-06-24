@@ -95,7 +95,12 @@ class AuthService {
 
   /// Logout dari semua metode (Email/Password maupun Google).
   Future<void> logout() async {
-    await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
+    await _auth.signOut();
+    try {
+      await _googleSignIn.signOut();
+    } catch (_) {
+      // Abaikan error jika google_sign_in gagal dipanggil (misal karena isu Client ID di Web)
+    }
   }
 
   // ─── Helper ────────────────────────────────────────────────────────────────

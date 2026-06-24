@@ -6,6 +6,9 @@ import 'package:sar_track/views/teams/team_view.dart';
 import 'package:sar_track/views/tracking/map_view.dart';
 import 'package:sar_track/controllers/auth_controller.dart';
 import 'package:sar_track/views/profile/edit_profile_view.dart';
+import 'package:sar_track/controllers/profile_controller.dart';
+import 'package:sar_track/views/profile/help_faq_view.dart';
+import 'package:sar_track/views/profile/security_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -13,6 +16,7 @@ class ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AuthController authController = Get.find<AuthController>();
+    final ProfileController profileController = Get.put(ProfileController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -28,7 +32,7 @@ class ProfileView extends StatelessWidget {
               children: [
                 // 0. Tombol Kembali ke Dashboard
                 Align(
-                  alignment: Alignment.topRight,
+                  alignment: Alignment.topLeft,
                   child: IconButton(
                     onPressed: () => Get.offAll(() => const DashboardView(),
                         transition: Transition.noTransition),
@@ -70,20 +74,21 @@ class ProfileView extends StatelessWidget {
                                   ),
                                 ],
                                 color: Colors.grey.shade200,
-                                image: imageUrl.isNotEmpty
-                                    ? DecorationImage(
-                                        image: NetworkImage(imageUrl),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
                               ),
-                              child: imageUrl.isEmpty
-                                  ? Icon(
-                                      Icons.person,
-                                      color: Colors.grey,
-                                      size: 64,
-                                    )
-                                  : null,
+                              child: ClipOval(
+                                child: imageUrl.isNotEmpty
+                                    ? Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            const Icon(Icons.broken_image, color: Colors.grey, size: 40),
+                                      )
+                                    : const Icon(
+                                        Icons.person,
+                                        color: Colors.grey,
+                                        size: 64,
+                                      ),
+                              ),
                             ),
                             // Badge
                             Positioned(
@@ -124,6 +129,50 @@ class ProfileView extends StatelessWidget {
                   }),
                 ),
                 const SizedBox(height: 32),
+
+                // 1.5 Status & Kesiapan Card
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Obx(() => Row(
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: profileController.isAvailable.value ? Colors.green : Colors.orange,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            "Status: ${profileController.isAvailable.value ? 'Tersedia' : 'Sibuk'}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF131A26),
+                            ),
+                          ),
+                        ],
+                      )),
+                      Obx(() => Switch(
+                        value: profileController.isAvailable.value,
+                        activeColor: const Color(0xFFFF6600),
+                        onChanged: (val) {
+                           profileController.toggleStatus(val);
+                        },
+                      )),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
 
                 // 2. Settings Menu Card
                 Container(
@@ -173,25 +222,68 @@ class ProfileView extends StatelessWidget {
                         Icons.lock_outline,
                         "Security",
                         onTap: () {
+                          Get.to(() => const SecurityView());
+                        },
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade300),
+                      _buildMenuItem(
+                        Icons.history,
+                        "Riwayat Misi",
+                        onTap: () {
                           Get.snackbar(
                             'Segera Hadir',
-                            'Fitur keamanan sedang dalam pengembangan.',
+                            'Fitur riwayat misi sedang dalam pengembangan.',
                             snackPosition: SnackPosition.BOTTOM,
                             margin: const EdgeInsets.all(16),
                           );
                         },
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // 2.5 Bantuan & Informasi Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Column(
+                    children: [
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline,
+                              color: Color(0xFFB54504),
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Bantuan & Informasi",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(
+                                  0xFF131A26,
+                                ).withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       Divider(height: 1, color: Colors.grey.shade300),
+
+                      // List Items
                       _buildMenuItem(
-                        Icons.notifications_none,
-                        "Notifications",
+                        Icons.help_outline,
+                        "Pusat Bantuan / FAQ",
                         onTap: () {
-                          Get.snackbar(
-                            'Segera Hadir',
-                            'Fitur notifikasi sedang dalam pengembangan.',
-                            snackPosition: SnackPosition.BOTTOM,
-                            margin: const EdgeInsets.all(16),
-                          );
+                          Get.to(() => const HelpFaqView());
                         },
                       ),
                     ],

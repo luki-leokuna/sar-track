@@ -16,6 +16,9 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
+  
+  bool isPasswordObscured = true;
+  bool isConfirmPasswordObscured = true;
 
   @override
   void dispose() {
@@ -192,7 +195,19 @@ class _RegisterViewState extends State<RegisterView> {
                         controller: passwordController,
                         hintText: "••••••••",
                         icon: Icons.lock_outline,
-                        obscureText: true,
+                        obscureText: isPasswordObscured,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isPasswordObscured ? Icons.visibility_off : Icons.visibility,
+                            color: const Color(0xFF6C757D),
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isPasswordObscured = !isPasswordObscured;
+                            });
+                          },
+                        ),
                       ),
                       const SizedBox(height: 16),
 
@@ -209,8 +224,20 @@ class _RegisterViewState extends State<RegisterView> {
                       _buildTextField(
                         controller: confirmPasswordController,
                         hintText: "••••••••",
-                        icon: Icons.history, // Icon yang mirip di referensi gambar
-                        obscureText: true,
+                        icon: Icons.history, 
+                        obscureText: isConfirmPasswordObscured,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isConfirmPasswordObscured ? Icons.visibility_off : Icons.visibility,
+                            color: const Color(0xFF6C757D),
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isConfirmPasswordObscured = !isConfirmPasswordObscured;
+                            });
+                          },
+                        ),
                       ),
                       const SizedBox(height: 24),
 
@@ -327,6 +354,7 @@ class _RegisterViewState extends State<RegisterView> {
     required IconData icon,
     bool obscureText = false,
     TextInputType keyboardType = TextInputType.text,
+    Widget? suffixIcon,
   }) {
     return TextField(
       controller: controller,
@@ -337,6 +365,7 @@ class _RegisterViewState extends State<RegisterView> {
         hintText: hintText,
         hintStyle: const TextStyle(color: Color(0xFFAEB5BC), fontSize: 14),
         prefixIcon: Icon(icon, color: const Color(0xFF6C757D), size: 20),
+        suffixIcon: suffixIcon,
         filled: true,
         fillColor: const Color(0xFFF1F3F5),
         contentPadding: const EdgeInsets.symmetric(vertical: 14),

@@ -14,6 +14,7 @@ class _LoginViewState extends State<LoginView> {
   final AuthController authController = Get.find<AuthController>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isPasswordObscured = true;
 
   @override
   void dispose() {
@@ -188,12 +189,24 @@ class _LoginViewState extends State<LoginView> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: passwordController,
-                        obscureText: true,
+                        obscureText: isPasswordObscured,
                         onChanged: (_) => authController.clearError(),
                         decoration: InputDecoration(
                           hintText: "••••••••",
                           hintStyle: const TextStyle(color: Color(0xFFAEB5BC), fontSize: 14),
                           prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF6C757D), size: 20),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              isPasswordObscured ? Icons.visibility_off : Icons.visibility,
+                              color: const Color(0xFF6C757D),
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isPasswordObscured = !isPasswordObscured;
+                              });
+                            },
+                          ),
                           filled: true,
                           fillColor: const Color(0xFFF1F3F5),
                           contentPadding: const EdgeInsets.symmetric(vertical: 14),

@@ -3,12 +3,16 @@ class UserModel {
   final String username;
   final String email;
   final String profileImageUrl;
+  final String role;
+  final String emergencyContact;
 
   const UserModel({
     required this.uid,
     required this.username,
     required this.email,
     this.profileImageUrl = '',
+    this.role = 'Relawan',
+    this.emergencyContact = '',
   });
 
   /// Konversi data snapshot Firebase → objek UserModel
@@ -18,6 +22,8 @@ class UserModel {
       username: json['username'] ?? '',
       email: json['email'] ?? '',
       profileImageUrl: json['profileImageUrl'] ?? '',
+      role: json['role'] ?? 'Relawan',
+      emergencyContact: json['emergencyContact'] ?? '',
     );
   }
 
@@ -28,6 +34,8 @@ class UserModel {
       'username': username,
       'email': email,
       'profileImageUrl': profileImageUrl,
+      'role': role,
+      'emergencyContact': emergencyContact,
     };
   }
 
@@ -37,12 +45,16 @@ class UserModel {
     String? username,
     String? email,
     String? profileImageUrl,
+    String? role,
+    String? emergencyContact,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
       username: username ?? this.username,
       email: email ?? this.email,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      role: role ?? this.role,
+      emergencyContact: emergencyContact ?? this.emergencyContact,
     );
   }
 
