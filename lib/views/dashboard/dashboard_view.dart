@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:sar_track/views/profile/profile_view.dart';
 import 'package:sar_track/views/teams/team_view.dart';
 import 'package:sar_track/views/tracking/map_view.dart';
-import 'package:sar_track/services/auth_service.dart';
+import 'package:sar_track/controllers/auth_controller.dart';
 import 'package:sar_track/views/teams/create_team_view.dart';
 import 'package:sar_track/views/teams/join_team_view.dart';
 
@@ -12,6 +12,10 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // AuthController sudah diregistrasi permanent di main.dart,
+    // jadi cukup find — jangan buat AuthService()/instance baru di sini.
+    final authController = Get.find<AuthController>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
@@ -20,40 +24,50 @@ class DashboardView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Header Profile
-              Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFFF6600), width: 2),
-                      color: Colors.grey.shade200,
-                      image: AuthService().currentUser?.photoURL != null
-                          ? DecorationImage(
-                              image: NetworkImage(AuthService().currentUser!.photoURL!),
-                              fit: BoxFit.cover,
+              // 1. Header Profile — reaktif terhadap perubahan user
+              Obx(() {
+                final user = authController.currentUser.value;
+                final hasPhoto = user?.profileImageUrl.isNotEmpty == true;
+
+                return Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFFF6600),
+                          width: 2,
+                        ),
+                        color: Colors.grey.shade200,
+                        image: hasPhoto
+                            ? DecorationImage(
+                                image: NetworkImage(user!.profileImageUrl),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                      ),
+                      child: !hasPhoto
+                          ? const Icon(
+                              Icons.person,
+                              color: Colors.grey,
+                              size: 32,
                             )
                           : null,
                     ),
-                    child: AuthService().currentUser?.photoURL == null
-                        ? const Icon(Icons.person, color: Colors.grey, size: 32)
-                        : null,
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    AuthService().currentUser?.displayName ?? 
-                    AuthService().currentUser?.email?.split('@').first ?? 
-                    "Sobat SAR",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF131A26),
+                    const SizedBox(width: 16),
+                    Text(
+                      user?.username ?? "Sobat SAR",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF131A26),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              }),
               const SizedBox(height: 40),
 
               // 2. Card "Buat Tim Baru"
@@ -68,7 +82,10 @@ class DashboardView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFFF6600), width: 1.5),
+                    border: Border.all(
+                      color: const Color(0xFFFF6600),
+                      width: 1.5,
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -80,7 +97,11 @@ class DashboardView extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: const Center(
-                          child: Icon(Icons.add, color: Color(0xFF5E2B15), size: 28),
+                          child: Icon(
+                            Icons.add,
+                            color: Color(0xFF5E2B15),
+                            size: 28,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -128,7 +149,11 @@ class DashboardView extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: const Center(
-                          child: Icon(Icons.people_alt_outlined, color: Colors.white, size: 24),
+                          child: Icon(
+                            Icons.people_alt_outlined,
+                            color: Colors.white,
+                            size: 24,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -148,7 +173,7 @@ class DashboardView extends StatelessWidget {
           ),
         ),
       ),
-      
+
       // 4. Custom Bottom Navigation Bar
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -165,15 +190,39 @@ class DashboardView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildNavItem(Icons.assignment, "Missions", true),
-              _buildNavItem(Icons.map_outlined, "Map", false, onTap: () {
-                Get.offAll(() => const MapView(), transition: Transition.noTransition);
-              }),
-              _buildNavItem(Icons.people_outline, "Teams", false, onTap: () {
-                Get.offAll(() => const TeamView(), transition: Transition.noTransition);
-              }),
-              _buildNavItem(Icons.account_circle_outlined, "Account", false, onTap: () {
-                Get.offAll(() => const ProfileView(), transition: Transition.noTransition);
-              }),
+              _buildNavItem(
+                Icons.map_outlined,
+                "Map",
+                false,
+                onTap: () {
+                  Get.offAll(
+                    () => const MapView(),
+                    transition: Transition.noTransition,
+                  );
+                },
+              ),
+              _buildNavItem(
+                Icons.people_outline,
+                "Teams",
+                false,
+                onTap: () {
+                  Get.offAll(
+                    () => const TeamView(),
+                    transition: Transition.noTransition,
+                  );
+                },
+              ),
+              _buildNavItem(
+                Icons.account_circle_outlined,
+                "Account",
+                false,
+                onTap: () {
+                  Get.offAll(
+                    () => const ProfileView(),
+                    transition: Transition.noTransition,
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -182,7 +231,12 @@ class DashboardView extends StatelessWidget {
   }
 
   // Helper untuk membuat item Bottom Navigation Bar
-  Widget _buildNavItem(IconData icon, String label, bool isSelected, {VoidCallback? onTap}) {
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    bool isSelected, {
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -196,7 +250,9 @@ class DashboardView extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: isSelected ? const Color(0xFF131A26) : const Color(0xFF495057),
+              color: isSelected
+                  ? const Color(0xFF131A26)
+                  : const Color(0xFF495057),
               size: 22,
             ),
             const SizedBox(height: 4),
@@ -205,7 +261,9 @@ class DashboardView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                color: isSelected ? const Color(0xFF131A26) : const Color(0xFF495057),
+                color: isSelected
+                    ? const Color(0xFF131A26)
+                    : const Color(0xFF495057),
               ),
             ),
           ],
