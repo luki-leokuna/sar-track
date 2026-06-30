@@ -1,23 +1,16 @@
-// ignore_for_file: dangling_library_doc_comments
-/// [BACKEND] location_service.dart
-/// Layanan akses GPS internal perangkat menggunakan package Geolocator.
-/// Menangani izin lokasi, ambil posisi sekali, dan stream posisi real-time.
-
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
-  // Konfigurasi akurasi dan interval update GPS
+  // distanceFilter harus int (Geolocator API requirement).
+  // Nilai 4 = pembulatan dari 3.5m target kita.
   static const LocationSettings _locationSettings = LocationSettings(
     accuracy: LocationAccuracy.high,
-    distanceFilter: 5, // Update setiap bergerak minimal 5 meter
+    distanceFilter: 4,
   );
 
-  // ─── Izin Lokasi ───────────────────────────────────────────────────────────
+  // ─── Izin Lokasi ──────────────────────────────────────────────────────────
 
-  /// Cek dan minta izin lokasi dari pengguna.
-  /// Mengembalikan true jika izin diberikan, false jika ditolak.
   Future<bool> requestPermission() async {
-    // Cek apakah GPS aktif di perangkat
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       throw 'GPS perangkat tidak aktif. Aktifkan lokasi terlebih dahulu.';
@@ -25,7 +18,6 @@ class LocationService {
 
     LocationPermission permission = await Geolocator.checkPermission();
 
-    // Jika belum pernah diminta, minta sekarang
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
@@ -33,7 +25,6 @@ class LocationService {
       }
     }
 
-    // Jika ditolak permanen, arahkan ke pengaturan sistem
     if (permission == LocationPermission.deniedForever) {
       throw 'Izin lokasi ditolak permanen. '
           'Buka Pengaturan > Izin Aplikasi untuk mengaktifkan.';
@@ -42,36 +33,33 @@ class LocationService {
     return true;
   }
 
-  /// Cek status izin tanpa meminta (untuk validasi awal)
   Future<bool> hasPermission() async {
     final permission = await Geolocator.checkPermission();
     return permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse;
   }
 
-  // ─── Ambil Posisi ──────────────────────────────────────────────────────────
+  // ─── Ambil Posisi ─────────────────────────────────────────────────────────
 
-  /// Ambil posisi GPS saat ini sekali (one-shot).
-  /// Digunakan saat pertama kali anggota join tim.
+  /// Ambil posisi sekali dengan akurasi tinggi + timeout 10 detik.
   Future<Position> getCurrentPosition() async {
     await requestPermission();
     return await Geolocator.getCurrentPosition(
       locationSettings: _locationSettings,
+    ).timeout(
+      const Duration(seconds: 10),
+      onTimeout: () => throw 'GPS timeout. Pastikan lokasi aktif.',
     );
   }
 
-  // ─── Stream Posisi Real-Time ───────────────────────────────────────────────
+  // ─── Stream Posisi Real-Time ──────────────────────────────────────────────
 
-  /// Stream posisi GPS yang terus berjalan selama tracking aktif.
-  /// Didengarkan oleh TrackingController untuk update ke Firebase.
   Stream<Position> getPositionStream() {
     return Geolocator.getPositionStream(locationSettings: _locationSettings);
   }
 
-  // ─── Utilitas ──────────────────────────────────────────────────────────────
+  // ─── Utilitas ─────────────────────────────────────────────────────────────
 
-  /// Hitung jarak antara dua titik koordinat dalam meter.
-  /// Wrapper dari Geolocator.distanceBetween() untuk kemudahan akses.
   double distanceBetween({
     required double startLatitude,
     required double startLongitude,

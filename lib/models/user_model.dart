@@ -5,6 +5,7 @@ class UserModel {
   final String profileImageUrl;
   final String role;
   final String emergencyContact;
+  final String? activeTeamId; // ID tim yang sedang aktif (null = belum ada tim)
 
   const UserModel({
     required this.uid,
@@ -13,9 +14,9 @@ class UserModel {
     this.profileImageUrl = '',
     this.role = 'Relawan',
     this.emergencyContact = '',
+    this.activeTeamId,
   });
 
-  /// Konversi data snapshot Firebase → objek UserModel
   factory UserModel.fromJson(Map<dynamic, dynamic> json, {String? uid}) {
     return UserModel(
       uid: uid ?? json['uid'] ?? '',
@@ -24,10 +25,10 @@ class UserModel {
       profileImageUrl: json['profileImageUrl'] ?? '',
       role: json['role'] ?? 'Relawan',
       emergencyContact: json['emergencyContact'] ?? '',
+      activeTeamId: json['activeTeamId'],
     );
   }
 
-  /// Konversi objek UserModel → Map untuk ditulis ke Firebase
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
@@ -36,10 +37,10 @@ class UserModel {
       'profileImageUrl': profileImageUrl,
       'role': role,
       'emergencyContact': emergencyContact,
+      if (activeTeamId != null) 'activeTeamId': activeTeamId,
     };
   }
 
-  /// Buat salinan objek dengan nilai yang diperbarui (immutability helper)
   UserModel copyWith({
     String? uid,
     String? username,
@@ -47,6 +48,7 @@ class UserModel {
     String? profileImageUrl,
     String? role,
     String? emergencyContact,
+    String? activeTeamId,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -55,10 +57,11 @@ class UserModel {
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       role: role ?? this.role,
       emergencyContact: emergencyContact ?? this.emergencyContact,
+      activeTeamId: activeTeamId ?? this.activeTeamId,
     );
   }
 
   @override
   String toString() =>
-      'UserModel(uid: $uid, username: $username, email: $email)';
+      'UserModel(uid: $uid, username: $username, email: $email, activeTeamId: $activeTeamId)';
 }

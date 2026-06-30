@@ -45,7 +45,7 @@ class AuthController extends GetxController {
     ever(_bindAuthState(), _handleAuthStateChange);
   }
 
-  // Bind Firebase authStateChanges ke Rx<User?> untuk didengarkan ever()
+  /// Bind Firebase authStateChanges ke `Rx<User?>` untuk didengarkan ever()
   Rx<User?> _bindAuthState() {
     final rxUser = Rx<User?>(null);
     _authService.authStateChanges.listen((user) {
@@ -60,7 +60,7 @@ class AuthController extends GetxController {
     if (firebaseUser == null) {
       // User logout → bersihkan data lokal dan ke halaman Login
       currentUser.value = null;
-      Get.offAllNamed('/login');
+      await _navigateSafely('/login');
     } else {
       // User login → ambil profil dari database lalu ke Dashboard
       try {
@@ -77,8 +77,17 @@ class AuthController extends GetxController {
           email: firebaseUser.email ?? '',
         );
       }
-      Get.offAllNamed('/dashboard');
+      await _navigateSafely('/dashboard');
     }
+  }
+
+  /// Navigasi aman — menunda satu microtask supaya GetMaterialApp
+  /// sudah selesai mount sebelum Get.offAllNamed() dipanggil.
+  /// Tanpa ini, AuthController yang di-put SEBELUM runApp() bisa
+  /// memicu navigasi sebelum widget tree siap ("contextless navigation").
+  Future<void> _navigateSafely(String route) async {
+    await Future.delayed(Duration.zero);
+    Get.offAllNamed(route);
   }
 
   // ─── Register ─────────────────────────────────────────────────────────────
